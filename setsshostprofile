@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Function to add or update a host profile
+setsshostprofile() {
+    local host=$1
+    local hostname=$2
+    local user=$3
+    local port=$4
+
+    local config_file="$HOME/.ssh/config"
+
+    # Check if the SSH configuration file exists
+    if [[ ! -f $config_file ]]; then
+        touch "$config_file"
+        chmod 600 "$config_file"
+    fi
+
+    # Check if the host profile already exists
+    if grep -q "Host $host$" "$config_file"; then
+        # Update the existing host profile
+        sed -i "/^Host $host$/,/^$/ { s/^\(\s*HostName\s*\).*$/\1$hostname/; s/^\(\s*User\s*\).*$/\1$user/; s/^\(\s*Port\s*\).*$/\1$port/; }" "$config_file"
+        echo "Updated host profile for $host"
+    else
+        # Add a new host profile
+        echo -e "\nHost $host" >> "$config_file"
+        echo "    HostName $hostname" >> "$config_file"
+        echo "    User $user" >> "$config_file"
+        echo "    Port $port" >> "$config_file"
+        echo "Added host profile for $host"
+    fi
+}
+
+# Add or update host profiles
+setsshostprofile "example" "example.com" "your_username" "22"
+setsshostprofile "another-example" "another-example.com" "your_username" "2222"
